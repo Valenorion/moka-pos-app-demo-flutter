@@ -2,13 +2,9 @@
 
 <div align="center">
 
-![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-%2300C7B7.svg?style=for-the-badge&logo=netlify&logoColor=white)
-
 **Aplikasi Kasir / Point of Sale (POS) & Cafe bersgaya Retro Y2K Pixel Art yang dikembangkan dengan Flutter untuk Ujian Tengah Semester (UTS).**
 
-[🌐 Coba Demo Live di Netlify](https://YOUR-NETLIFY-SITE.netlify.app) *(Ganti dengan link Netlify Anda)*
+[🌐 Coba Demo Live di Netlify](https://moka-pos-app-demo.netlify.app/) 
 
 </div>
 
