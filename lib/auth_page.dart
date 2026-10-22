@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dashboard_page.dart';
 
+// Warna Bawaan Y2K/MOKA
 class LoginColors {
   static const mochaDark = Color(0xFF2D1813);
   static const mocha = Color(0xFF48291F);
@@ -14,6 +15,7 @@ class LoginColors {
   static const line = Color(0xFFE9DFDC);
 }
 
+// Komponen Ikon 8-Bit
 class PixelIcon7x7 extends StatelessWidget {
   final String name;
   final double size;
@@ -63,15 +65,6 @@ class PixelIcon7x7 extends StatelessWidget {
       "0000001",
       "0000000",
     ],
-    'cup': [
-      "1111100",
-      "1000110",
-      "1010110",
-      "1000110",
-      "1111100",
-      "0111000",
-      "1111100",
-    ],
     'spark': [
       "0001000",
       "0001000",
@@ -85,7 +78,8 @@ class PixelIcon7x7 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pattern = _patterns[name] ?? _patterns['cup']!;
+    // Memastikan jika dipanggil pattern cup tetap aman, fallback ke spark.
+    final pattern = _patterns[name] ?? _patterns['spark']!;
     final pixels = pattern.join("").split("");
 
     return SizedBox(
@@ -138,13 +132,13 @@ class _PixelButtonState extends State<PixelButton> {
 
   @override
   Widget build(BuildContext context) {
-    // Menghitung kedalaman bayangan dan perpindahan posisi tombol saat dihover/ditekan
     final double shadowOffset = _isPressed ? 1.0 : (_isHovered ? 3.0 : 5.0);
     final double translation = 5.0 - shadowOffset;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) {
@@ -215,15 +209,12 @@ class _AuthPageState extends State<AuthPage> {
     final prefs = await SharedPreferences.getInstance();
 
     if (isLoginMode) {
-      // Baca kredensial yang tersimpan. Jika belum ada (null), gunakan default 'Minji' dan '123'
-      final savedUser = prefs.getString('user') ?? 'Minji';
+      final savedUser = prefs.getString('user') ?? 'Valen';
       final savedPass = prefs.getString('pass') ?? '123';
 
-      // Validasi Login
       if (_userCtrl.text.isNotEmpty &&
           _userCtrl.text == savedUser &&
           _passCtrl.text == savedPass) {
-        // MENYIMPAN STATUS LOGIN AGAR TIDAK HILANG SAAT REFRESH
         await prefs.setBool('isLoggedIn', true);
 
         setState(() => showSuccessMessage = true);
@@ -238,23 +229,19 @@ class _AuthPageState extends State<AuthPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Username atau Password salah! Default: User: Minji, Pass: 123',
-            ), // Menampilkan hint default
+            content: Text('Akses Ditolak! Default ID Kasir: Valen | PIN: 123'),
             backgroundColor: LoginColors.mochaDark,
           ),
         );
       }
     } else {
-      // Validasi Register
       if (_userCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Mohon isi semua kolom!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mohon isi semua data kredensial!')),
+        );
         return;
       }
 
-      // Simpan User & Pass baru
       await prefs.setString('user', _userCtrl.text);
       await prefs.setString('pass', _passCtrl.text);
 
@@ -265,9 +252,7 @@ class _AuthPageState extends State<AuthPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Pendaftaran berhasil! Silakan Login dengan akun barumu.',
-          ),
+          content: Text('Registrasi kasir berhasil! Silakan Login ke sistem.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -281,6 +266,7 @@ class _AuthPageState extends State<AuthPage> {
       body: SafeArea(
         child: Stack(
           children: [
+            // Ornamen Pixel
             Positioned(
               top: 100,
               right: 20,
@@ -291,6 +277,7 @@ class _AuthPageState extends State<AuthPage> {
               left: 15,
               child: Container(width: 7, height: 7, color: LoginColors.mocha),
             ),
+
             LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
@@ -306,34 +293,15 @@ class _AuthPageState extends State<AuthPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // BRAND HEADER
+                          // BRAND HEADER - Menggunakan moka.png
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: const BoxDecoration(
-                                  color: LoginColors.pink,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: LoginColors.mochaDark,
-                                      offset: Offset(4, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: const Center(
-                                  child: PixelIcon7x7(
-                                    name: 'cup',
-                                    size: 28,
-                                    color: LoginColors.mochaDark,
-                                  ),
-                                ),
-                              ),
+                              Image.asset('assets/moka.png', width: 50),
                               RichText(
                                 text: TextSpan(
                                   style: GoogleFonts.pixelifySans(
-                                    fontSize: 24,
+                                    fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                     color: LoginColors.mocha,
                                     letterSpacing: 1,
@@ -360,7 +328,6 @@ class _AuthPageState extends State<AuthPage> {
 
                           const SizedBox(height: 35),
 
-                          // TRANSISI ANIMASI ANTAR HALAMAN (LOGIN <-> REGISTER)
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             transitionBuilder:
@@ -390,8 +357,8 @@ class _AuthPageState extends State<AuthPage> {
                                     const SizedBox(width: 7),
                                     Text(
                                       isLoginMode
-                                          ? 'NICE TO SEE YOU'
-                                          : 'GET STARTED',
+                                          ? 'SISTEM POS TERMINAL'
+                                          : 'TAMBAH STAF BARU',
                                       style: GoogleFonts.pixelifySans(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
@@ -404,8 +371,8 @@ class _AuthPageState extends State<AuthPage> {
                                 const SizedBox(height: 10),
                                 Text(
                                   isLoginMode
-                                      ? 'Welcome\nback!'
-                                      : 'Create\naccount!',
+                                      ? 'Kasir\nTerminal'
+                                      : 'Daftar\nKredensial',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 48,
                                     fontWeight: FontWeight.bold,
@@ -417,8 +384,8 @@ class _AuthPageState extends State<AuthPage> {
                                 const SizedBox(height: 12),
                                 Text(
                                   isLoginMode
-                                      ? "Sign in and let's get your coffee started."
-                                      : "Register now and order your favorite drink.",
+                                      ? "Login untuk membuka shift dan memulai pesanan."
+                                      : "Daftarkan ID dan PIN baru untuk otorisasi sistem.",
                                   style: GoogleFonts.dmSans(
                                     fontSize: 13,
                                     color: LoginColors.mochaMuted,
@@ -430,9 +397,8 @@ class _AuthPageState extends State<AuthPage> {
 
                           const SizedBox(height: 30),
 
-                          // INPUT USERNAME
                           Text(
-                            'Username',
+                            'ID Kasir',
                             style: GoogleFonts.dmSans(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -460,13 +426,15 @@ class _AuthPageState extends State<AuthPage> {
                                   child: TextField(
                                     controller: _userCtrl,
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 13,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
                                       color: LoginColors.mocha,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText: 'Your username',
+                                      hintText: 'Cth: Valen',
                                       hintStyle: GoogleFonts.dmSans(
                                         color: const Color(0xFFB7A9A4),
+                                        fontWeight: FontWeight.normal,
                                       ),
                                       border: InputBorder.none,
                                     ),
@@ -478,12 +446,11 @@ class _AuthPageState extends State<AuthPage> {
 
                           const SizedBox(height: 20),
 
-                          // INPUT PASSWORD
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Password',
+                                'PIN Keamanan',
                                 style: GoogleFonts.dmSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -492,9 +459,17 @@ class _AuthPageState extends State<AuthPage> {
                               ),
                               if (isLoginMode)
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Hubungi Supervisor (Atasan) untuk reset PIN.',
+                                        ),
+                                      ),
+                                    );
+                                  },
                                   child: Text(
-                                    'Forgot password?',
+                                    'Lupa PIN?',
                                     style: GoogleFonts.dmSans(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
@@ -526,13 +501,15 @@ class _AuthPageState extends State<AuthPage> {
                                     controller: _passCtrl,
                                     obscureText: !showPassword,
                                     style: GoogleFonts.dmSans(
-                                      fontSize: 13,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
                                       color: LoginColors.mocha,
                                     ),
                                     decoration: InputDecoration(
-                                      hintText: 'Your password',
+                                      hintText: 'Masukkan PIN...',
                                       hintStyle: GoogleFonts.dmSans(
                                         color: const Color(0xFFB7A9A4),
+                                        fontWeight: FontWeight.normal,
                                       ),
                                       border: InputBorder.none,
                                     ),
@@ -573,7 +550,7 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  "You're all set. Coffee time!",
+                                  "Akses Diterima. Memuat Sistem POS...",
                                   style: GoogleFonts.dmSans(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -586,9 +563,10 @@ class _AuthPageState extends State<AuthPage> {
 
                           const SizedBox(height: 28),
 
-                          // TOMBOL UTAMA
                           PixelButton(
-                            text: isLoginMode ? 'Login' : 'Submit Register',
+                            text: isLoginMode
+                                ? 'Buka Shift Kasir'
+                                : 'Daftarkan Kredensial',
                             suffixIcon: isLoginMode ? '→' : null,
                             backgroundColor: LoginColors.pink,
                             textColor: LoginColors.mochaDark,
@@ -608,7 +586,7 @@ class _AuthPageState extends State<AuthPage> {
                                   horizontal: 12,
                                 ),
                                 child: Text(
-                                  'OR',
+                                  'SISTEM INTERNAL',
                                   style: GoogleFonts.pixelifySans(
                                     fontSize: 9,
                                     color: const Color(0xFFB2A39E),
@@ -623,9 +601,10 @@ class _AuthPageState extends State<AuthPage> {
 
                           const SizedBox(height: 20),
 
-                          // TOMBOL SEKUNDER
                           PixelButton(
-                            text: isLoginMode ? 'Register' : 'Back to Login',
+                            text: isLoginMode
+                                ? 'Registrasi Staf Baru'
+                                : 'Kembali ke Login',
                             backgroundColor: LoginColors.mocha,
                             textColor: LoginColors.white,
                             shadowColor: LoginColors.pink,
@@ -639,7 +618,6 @@ class _AuthPageState extends State<AuthPage> {
 
                           const Spacer(),
 
-                          // FOOTER
                           Padding(
                             padding: const EdgeInsets.only(top: 24),
                             child: Row(
@@ -652,7 +630,7 @@ class _AuthPageState extends State<AuthPage> {
                                 ),
                                 const SizedBox(width: 9),
                                 Text(
-                                  'One cup closer to a good day.',
+                                  'MOKA POS System V.2',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 9,
                                     color: const Color(0xFFA99892),

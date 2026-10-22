@@ -107,4 +107,13 @@ final List<Product> products = [
     "FRESH",
     "assets/images/menu/peach_cold_brew.png",
   ),
+  Product(
+    11,
+    "Es Teh Ajib",
+    "Es Teh · JUMBO",
+    5000,
+    "Non-coffee",
+    "JUMBO",
+    "assets/images/menu/esteh_ajib.png",
+  ),
 ];

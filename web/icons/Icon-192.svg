@@ -1,0 +1,8 @@
+<svg viewBox="0 0 1024 1024" role="img" aria-labelledby="icon-title icon-description" xmlns="http://www.w3.org/2000/svg">
+  <title id="icon-title">Pastel pink M app icon</title>
+  <desc id="icon-description">A softly rounded pastel pink letter M.</desc>
+
+  <rect width="1024" height="1024" rx="224" fill="#FFFFFF" />
+
+  <path d="M214 716V324C214 276 243 244 286 244C314 244 335 256 356 281L512 476L668 281C689 256 710 244 738 244C781 244 810 276 810 324V716C810 757 778 786 738 786C698 786 668 757 668 716V474L568 600C553 619 535 629 512 629C489 629 471 619 456 600L356 474V716C356 757 326 786 286 786C246 786 214 757 214 716Z" fill="#F2A9C3" />
+</svg>

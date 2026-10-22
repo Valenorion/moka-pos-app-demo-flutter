@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Tambahan untuk membaca sesi
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auth_page.dart';
-import 'dashboard_page.dart'; // Tambahan agar bisa diarahkan ke dashboard
+import 'dashboard_page.dart';
+import 'moka_theme.dart'; // Menggunakan tema warna konsisten MOKA
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,33 +15,49 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
-    _checkLoginSession(); // Memanggil fungsi pengecekan sesi saat aplikasi dibuka
+
+    // Inisialisasi animasi denyut (pulsing) untuk logo moka.png
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.08,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _checkLoginSession();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _checkLoginSession() async {
-    // 1. Inisialisasi SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-
-    // 2. Cek status login (jika belum ada, default-nya false)
     final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    // 3. Jeda waktu Splash Screen selama 3.5 detik (sesuai timer Anda sebelumnya)
+    // Durasi tampil splash screen 3.5 detik
     await Future.delayed(const Duration(milliseconds: 3500));
 
-    // 4. Logika perpindahan halaman
     if (mounted) {
       if (isLoggedIn) {
-        // Jika sudah login, langsung lompat ke Dashboard
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const DashboardPage()),
         );
       } else {
-        // Jika belum login, masuk ke halaman Auth/Login
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const AuthPage()),
@@ -50,21 +67,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Widget _buildPixelLetter(String letter, {required bool isBrown}) {
-    final textColor = isBrown
-        ? const Color(0xFF48291F)
-        : const Color(0xFFF5A6B9);
-    final shadowColor = isBrown
-        ? const Color(0xFFF5A6B9)
-        : const Color(0xFF48291F);
+    final textColor = isBrown ? MokaColors.brown : MokaColors.pink;
+    final shadowColor = isBrown ? MokaColors.pink : MokaColors.brown;
 
     return Text(
       letter,
       style: GoogleFonts.pixelifySans(
-        fontSize: 64,
+        fontSize: 56,
         fontWeight: FontWeight.w700,
         height: 0.85,
         color: textColor,
-        shadows: [Shadow(color: shadowColor, offset: const Offset(4, 4))],
+        shadows: [Shadow(color: shadowColor, offset: const Offset(3, 3))],
       ),
     );
   }
@@ -72,46 +85,96 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: MokaColors.white,
       body: Stack(
         alignment: Alignment.center,
         children: [
+          // Ornamen Background Estetik ala Piksel Y2K
+          Positioned(
+            top: 80,
+            left: 40,
+            child: Container(width: 8, height: 8, color: MokaColors.pink),
+          ),
+          Positioned(
+            top: 120,
+            right: 50,
+            child: Container(
+              width: 12,
+              height: 12,
+              color: MokaColors.brownSoft.withOpacity(0.3),
+            ),
+          ),
+          Positioned(
+            bottom: 150,
+            left: 50,
+            child: Container(width: 10, height: 10, color: MokaColors.pinkSoft),
+          ),
+
+          // Konten Utama Splash Screen
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 200,
-                height: 200,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Transform.rotate(
-                      angle: -0.07,
-                      child: Container(
-                        width: 160,
-                        height: 160,
-                        decoration: const BoxDecoration(
-                          color: Color(0x59FFDCE4),
-                        ),
+              // Tulisan "WELCOME" Sesuai Permintaan
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: MokaColors.pinkSoft,
+                  border: Border.all(color: MokaColors.pink, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'WELCOME TO MOKA',
+                  style: GoogleFonts.pixelifySans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2.0,
+                    color: MokaColors.brown,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Logo moka.png dengan Animasi Denyut (Scale Transition)
+              ScaleTransition(
+                scale: _scaleAnimation,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: MokaColors.cream,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: MokaColors.pink, width: 3),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: MokaColors.brown,
+                        offset: Offset(4, 4),
+                        blurRadius: 0, // Efek hard shadow piksel
                       ),
-                    ),
-                    Image.asset(
-                      'carmen.jpg', // Ganti dengan nama file gambar di folder assets Anda
-                      width: 150,
-                      height: 150,
+                    ],
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/moka.png', // Pastikan path asset sudah sesuai
+                      width: 100,
+                      height: 100,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(
                           Icons.local_cafe,
-                          size: 80,
-                          color: Color(0xFFF5A6B9),
+                          size: 70,
+                          color: MokaColors.pink,
                         );
                       },
                     ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+
+              // Nama Brand M O K A (Pixel Font)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -124,33 +187,105 @@ class _SplashScreenState extends State<SplashScreen> {
                   _buildPixelLetter('A', isBrown: false),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               Text(
-                'COFFEE & GOOD DAYS',
+                'POS TERMINAL & COFFEE SHOP',
                 style: GoogleFonts.pixelifySans(
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 3.0,
-                  color: const Color(0xFF48291F),
+                  letterSpacing: 2.5,
+                  color: MokaColors.brownSoft,
                 ),
               ),
             ],
           ),
+
+          // Animasi Loading Indikator Titik Piksel Bergerak di Bagian Bawah
           Positioned(
-            bottom: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            bottom: 50,
+            child: Column(
               children: [
-                Container(width: 5, height: 5, color: const Color(0xFFFFDCE4)),
-                const SizedBox(width: 6),
-                Container(width: 5, height: 5, color: const Color(0xFF48291F)),
-                const SizedBox(width: 6),
-                Container(width: 5, height: 5, color: const Color(0xFF48291F)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (index) {
+                    return _BouncingDot(delay: index * 200);
+                  }),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Memuat Sistem...',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 11,
+                    color: MokaColors.brownSoft,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// Widget Pendukung untuk Animasi Titik Bouncing (Naik-Turun Bergantian)
+class _BouncingDot extends StatefulWidget {
+  final int delay;
+  const _BouncingDot({required this.delay});
+
+  @override
+  State<_BouncingDot> createState() => _BouncingDotState();
+}
+
+class _BouncingDotState extends State<_BouncingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _bounceAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _bounceAnimation = Tween<double>(begin: 0, end: -8).animate(
+      CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
+    );
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        _animController.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _bounceAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _bounceAnimation.value),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: widget.delay == 200 ? MokaColors.pink : MokaColors.brown,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        );
+      },
     );
   }
 }

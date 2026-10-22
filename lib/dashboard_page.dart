@@ -4,12 +4,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'moka_theme.dart';
 import 'checkout_page.dart';
 import 'auth_page.dart';
 
-// Import File Tab
 import 'menu_page.dart';
 import 'pesanan_page.dart';
 import 'akun_page.dart';
@@ -25,7 +25,7 @@ String formatRupiah(double number) {
 }
 
 // ============================================================================
-// WIDGET PROMO BANNER (INFINITE SCROLL SEARAH & KONTEN VARIATIF)
+// WIDGET PROMO BANNER (POV KASIR)
 // ============================================================================
 class PromoBannerSlider extends StatefulWidget {
   const PromoBannerSlider({super.key});
@@ -41,21 +41,21 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
 
   final List<Map<String, String>> _banners = [
     {
-      'tag': 'NEW DROP',
-      'title': 'Berry Moka\nis here!',
-      'action': 'Explore menu →',
+      'tag': 'SHIFT PAGI',
+      'title': 'Siap Melayani\nPelanggan!',
+      'action': 'Mulai Order →',
       'bg': '0xFFFFF0F4',
     },
     {
-      'tag': 'PROMO BOGO',
-      'title': 'Buy 1 Get 1\nEvery Friday',
-      'action': 'Claim voucher →',
+      'tag': 'INFO KASIR',
+      'title': 'Pastikan Uang\nKembalian Pas',
+      'action': 'Cek Laci Kasir →',
       'bg': '0xFFF4F0FF',
     },
     {
-      'tag': 'Y2K MEMBER',
-      'title': 'Double Points\nAll Drinks',
-      'action': 'Check rewards →',
+      'tag': 'TARGET HARIAN',
+      'title': 'Capai 100\nTransaksi!',
+      'action': 'Lihat Laporan →',
       'bg': '0xFFF0FFF5',
     },
   ];
@@ -166,7 +166,7 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
               ),
               child: const Center(
                 child: Icon(
-                  Icons.local_offer,
+                  Icons.point_of_sale,
                   color: MokaColors.brown,
                   size: 40,
                 ),
@@ -431,7 +431,7 @@ class _HoverableCartState extends State<HoverableCart> {
                 padding: const EdgeInsets.all(8),
                 color: MokaColors.pink,
                 child: const Icon(
-                  Icons.shopping_cart,
+                  Icons.point_of_sale,
                   size: 20,
                   color: MokaColors.brown,
                 ),
@@ -442,7 +442,7 @@ class _HoverableCartState extends State<HoverableCart> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'YOUR ORDER',
+                    'TOTAL PENJUALAN',
                     style: GoogleFonts.vt323(
                       fontSize: 10,
                       color: MokaColors.pinkSoft,
@@ -477,12 +477,13 @@ class _HoverableCartState extends State<HoverableCart> {
 }
 
 // ============================================================================
-// WIDGET PRODUCT CARD
+// WIDGET PRODUCT CARD (POV KASIR)
 // ============================================================================
 class ProductCardItem extends StatefulWidget {
   final Product product;
   final VoidCallback onImageOrTitleTap;
   final VoidCallback onAddTap;
+
   const ProductCardItem({
     super.key,
     required this.product,
@@ -496,6 +497,7 @@ class ProductCardItem extends StatefulWidget {
 
 class _ProductCardItemState extends State<ProductCardItem> {
   bool _isHovered = false;
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -510,7 +512,7 @@ class _ProductCardItemState extends State<ProductCardItem> {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: widget.onImageOrTitleTap,
+                onTap: widget.onAddTap,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
@@ -566,20 +568,13 @@ class _ProductCardItemState extends State<ProductCardItem> {
                 ),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formatRupiah(widget.product.price),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add_box, color: MokaColors.brown),
-                  onPressed: widget.onAddTap,
-                  hoverColor: MokaColors.pinkSoft,
-                  tooltip: 'Add to Cart',
-                ),
-              ],
+            const SizedBox(height: 4),
+            Text(
+              formatRupiah(widget.product.price),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: MokaColors.brownSoft,
+              ),
             ),
           ],
         ),
@@ -599,7 +594,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _currentIndex = 0; // State Navigasi Bawah
+  int _currentIndex = 0;
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
 
@@ -611,7 +606,6 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     _loadCart();
 
-    // Deteksi Scroll untuk menampilkan tombol Scroll To Top
     _scrollController.addListener(() {
       if (_scrollController.offset > 250 && !_showScrollToTop) {
         setState(() => _showScrollToTop = true);
@@ -625,6 +619,12 @@ class _DashboardPageState extends State<DashboardPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshData() async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    await _loadCart();
+    setState(() {});
   }
 
   Future<void> _loadCart() async {
@@ -653,7 +653,7 @@ class _DashboardPageState extends State<DashboardPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '${p.name} ditambahkan ke keranjang!',
+          '${p.name} ditambahkan ke total penjualan!',
           style: GoogleFonts.dmSans(),
         ),
         backgroundColor: MokaColors.brown,
@@ -763,7 +763,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  void _showInfoDialog(String title, String message, IconData icon) {
+  void _showInfoDialog(
+    String title,
+    String message,
+    IconData icon, {
+    String? url,
+    String? btnText,
+  }) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -781,12 +787,36 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Tutup',
-              style: TextStyle(
-                color: MokaColors.brown,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
             ),
           ),
+          if (url != null)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MokaColors.brown,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  messenger.showSnackBar(
+                    const SnackBar(content: Text('Gagal membuka tautan.')),
+                  );
+                }
+              },
+              child: Text(
+                btnText ?? 'Buka',
+                style: const TextStyle(
+                  color: MokaColors.pinkSoft,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -794,7 +824,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _showUpdatePasswordDialog() async {
     final prefs = await SharedPreferences.getInstance();
-    final currentUser = prefs.getString('user') ?? 'Minji';
+    final currentUser = prefs.getString('user') ?? 'Valen';
 
     final userCtrl = TextEditingController(text: currentUser);
     final passCtrl = TextEditingController();
@@ -846,17 +876,19 @@ class _DashboardPageState extends State<DashboardPage> {
                 );
                 return;
               }
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
               await prefs.setString('user', userCtrl.text);
               await prefs.setString('pass', passCtrl.text);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Sukses! Silakan gunakan kredensial baru.'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              }
+
+              navigator.pop();
+              messenger.showSnackBar(
+                const SnackBar(
+                  content: Text('Sukses! Silakan gunakan kredensial baru.'),
+                  backgroundColor: Colors.green,
+                ),
+              );
             },
             child: const Text(
               'Simpan',
@@ -873,338 +905,349 @@ class _DashboardPageState extends State<DashboardPage> {
         ? products
         : products.where((p) => p.category == _selectedCategory).toList();
 
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 250),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: MokaColors.pinkSoft,
-                      border: Border.all(color: MokaColors.pink),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.pin_drop,
-                      size: 16,
-                      color: MokaColors.brown,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'ORDER FROM',
-                        style: GoogleFonts.vt323(
-                          fontSize: 10,
-                          color: MokaColors.brownSoft,
-                        ),
+    return RefreshIndicator(
+      color: MokaColors.pink,
+      backgroundColor: MokaColors.brown,
+      onRefresh: _refreshData,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 250),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: MokaColors.pinkSoft,
+                        border: Border.all(color: MokaColors.pink),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      const Text(
-                        'Moka Shibuya',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      child: const Icon(
+                        Icons.pin_drop,
+                        size: 16,
+                        color: MokaColors.brown,
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              PopupMenuButton<String>(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                offset: const Offset(0, 50),
-                icon: const CircleAvatar(
-                  backgroundColor: MokaColors.brown,
-                  child: Text(
-                    'M',
-                    style: TextStyle(
-                      color: MokaColors.pink,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ),
-                onSelected: (val) async {
-                  if (val == 'call')
-                    _showInfoDialog(
-                      'Call Center',
-                      'Layanan Pelanggan Bebas Pulsa:\n📞 0800-1-MOKA-00\n(Aktif 24 Jam)',
-                      Icons.headset_mic,
-                    );
-                  else if (val == 'sms')
-                    _showInfoDialog(
-                      'SMS Center',
-                      'Kirim kritik & saran via SMS ke:\n📱 0812-3456-7890',
-                      Icons.sms,
-                    );
-                  else if (val == 'maps')
-                    _showInfoDialog(
-                      'Lokasi/Maps',
-                      'Moka Shibuya\nJl. Shibuya Crossing No. 8, Lt. 1\nBuka: 08:00 - 22:00',
-                      Icons.map,
-                    );
-                  else if (val == 'update')
-                    _showUpdatePasswordDialog();
-                  else if (val == 'logout') {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('isLoggedIn', false);
-                    await prefs.remove('cartIds');
-                    if (context.mounted)
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (_) => const AuthPage()),
-                        (route) => false,
-                      );
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'call',
-                    child: Row(
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.headset_mic, color: MokaColors.brown),
-                        const SizedBox(width: 12),
-                        Text('Call Center', style: GoogleFonts.dmSans()),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'sms',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.sms, color: MokaColors.brown),
-                        const SizedBox(width: 12),
-                        Text('SMS Center', style: GoogleFonts.dmSans()),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'maps',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.map, color: MokaColors.brown),
-                        const SizedBox(width: 12),
-                        Text('Lokasi/Maps', style: GoogleFonts.dmSans()),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'update',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.lock_reset, color: MokaColors.brown),
-                        const SizedBox(width: 12),
                         Text(
-                          'Update User & Password',
-                          style: GoogleFonts.dmSans(),
+                          'ORDER FROM',
+                          style: GoogleFonts.vt323(
+                            fontSize: 10,
+                            color: MokaColors.brownSoft,
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.logout, color: Colors.red),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Logout',
-                          style: GoogleFonts.dmSans(
-                            color: Colors.red,
+                        const Text(
+                          'Moka Shibuya',
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
+                  ],
+                ),
+                PopupMenuButton<String>(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              const Icon(
-                Icons.auto_awesome,
-                size: 12,
-                color: Color(0xFFBC7081),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'GOOD MORNING, MINJI',
-                style: GoogleFonts.vt323(
-                  fontSize: 12,
-                  color: const Color(0xFFBC7081),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Sweet day,\none sip away.',
-            style: GoogleFonts.dmSans(
-              fontSize: 42,
-              height: 1.0,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -1.5,
-              color: MokaColors.brown,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'What are we having today?',
-            style: GoogleFonts.dmSans(
-              fontSize: 14,
-              color: MokaColors.brownSoft,
-            ),
-          ),
-          const SizedBox(height: 24),
-          const PromoBannerSlider(),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Pick your mood',
-                style: GoogleFonts.dmSans(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                  offset: const Offset(0, 50),
+                  icon: Container(
+                    width: 40,
+                    height: 40,
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: MokaColors.brown,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset('assets/moka.png'), // DIHAPUS WARNANYA
+                  ),
+                  onSelected: (val) async {
+                    if (val == 'call') {
+                      _showInfoDialog(
+                        'Call Center / WA',
+                        'Layanan Pelanggan kami sedia membantu Anda:\n📞 0858-6981-8403\n(Aktif 24 Jam)',
+                        Icons.headset_mic,
+                        url: 'https://wa.me/6285869818403?text=Halo%20Admin%20MOKA,%20saya%20butuh%20bantuan.',
+                        btnText: 'Chat WhatsApp',
+                      );
+                    } else if (val == 'sms') {
+                      _showInfoDialog(
+                        'SMS Center',
+                        'Kirim kritik & saran via SMS ke:\n📱 0858-6981-8403',
+                        Icons.sms,
+                        url: 'sms:+6285869818403',
+                        btnText: 'Kirim SMS',
+                      );
+                    } else if (val == 'maps') {
+                      _showInfoDialog(
+                        'Lokasi / Maps',
+                        'Moka Shibuya\nJl. Shibuya Crossing No. 8, Lt. 1\nBuka: 08:00 - 22:00',
+                        Icons.map,
+                        url: 'https://maps.google.com/?q=Dian+Nuswantoro',
+                        btnText: 'Buka Maps',
+                      );
+                    } else if (val == 'update') {
+                      _showUpdatePasswordDialog();
+                    } else if (val == 'logout') {
+                      final navigator = Navigator.of(context);
+                      final prefs = await SharedPreferences.getInstance();
 
-              // FITUR SEE ALL MENGARAH KE MENU (INDEX 1)
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => setState(() => _currentIndex = 1),
-                  child: Text(
-                    'See all',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFBC7081),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CategoryButtonWidget(
-                title: 'Popular',
-                icon: const Icon(Icons.star, color: MokaColors.brown),
-                isSelected: _selectedCategory == 'Popular',
-                onTap: () => setState(() => _selectedCategory = 'Popular'),
-              ),
-              CategoryButtonWidget(
-                title: 'Signature',
-                icon: Text(
-                  'M',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: MokaColors.brown,
-                  ),
-                ),
-                isSelected: _selectedCategory == 'Signature',
-                onTap: () => setState(() => _selectedCategory = 'Signature'),
-              ),
-              CategoryButtonWidget(
-                title: 'Coffee',
-                icon: const Icon(Icons.coffee, color: MokaColors.brown),
-                isSelected: _selectedCategory == 'Coffee',
-                onTap: () => setState(() => _selectedCategory = 'Coffee'),
-              ),
-              CategoryButtonWidget(
-                title: 'Non-coffee',
-                icon: const Icon(Icons.local_drink, color: MokaColors.brown),
-                isSelected: _selectedCategory == 'Non-coffee',
-                onTap: () => setState(() => _selectedCategory = 'Non-coffee'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                _selectedCategory == 'Popular'
-                    ? 'Most loved'
-                    : '$_selectedCategory Menu',
-                style: GoogleFonts.dmSans(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '${filteredProducts.length} drinks',
-                style: GoogleFonts.dmSans(
-                  fontSize: 12,
-                  color: MokaColors.brownSoft,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          filteredProducts.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
-                    child: Text(
-                      'Belum ada menu di kategori ini.',
-                      style: TextStyle(color: MokaColors.brownSoft),
-                    ),
-                  ),
-                )
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    int crossAxisCount = 2;
-                    double aspectRatio = 0.75;
-                    if (constraints.maxWidth > 700) {
-                      crossAxisCount = 4;
-                      aspectRatio = 0.72;
-                    } else if (constraints.maxWidth > 480) {
-                      crossAxisCount = 3;
-                      aspectRatio = 0.75;
+                      await prefs.setBool('isLoggedIn', false);
+                      await prefs.remove('cartIds');
+
+                      navigator.pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const AuthPage()),
+                        (route) => false,
+                      );
                     }
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: aspectRatio,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        return ProductCardItem(
-                          product: filteredProducts[index],
-                          onImageOrTitleTap: () =>
-                              _showDescription(filteredProducts[index]),
-                          onAddTap: () => _addToCart(filteredProducts[index]),
-                        );
-                      },
-                    );
                   },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'call',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.headset_mic,
+                            color: MokaColors.brown,
+                          ),
+                          const SizedBox(width: 12),
+                          Text('Call Center', style: GoogleFonts.dmSans()),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'sms',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.sms, color: MokaColors.brown),
+                          const SizedBox(width: 12),
+                          Text('SMS Center', style: GoogleFonts.dmSans()),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'maps',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.map, color: MokaColors.brown),
+                          const SizedBox(width: 12),
+                          Text('Lokasi/Maps', style: GoogleFonts.dmSans()),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'update',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.lock_reset, color: MokaColors.brown),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Update User & Password',
+                            style: GoogleFonts.dmSans(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.logout, color: Colors.red),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Logout',
+                            style: GoogleFonts.dmSans(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                const Icon(
+                  Icons.auto_awesome,
+                  size: 12,
+                  color: Color(0xFFBC7081),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'KASIR AKTIF: VALEN',
+                  style: GoogleFonts.vt323(
+                    fontSize: 12,
+                    color: const Color(0xFFBC7081),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Sweet day,\none sip away.',
+              style: GoogleFonts.dmSans(
+                fontSize: 42,
+                height: 1.0,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -1.5,
+                color: MokaColors.brown,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Pilih menu pesanan pelanggan.',
+              style: GoogleFonts.dmSans(
+                fontSize: 14,
+                color: MokaColors.brownSoft,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const PromoBannerSlider(),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Kategori Menu',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _currentIndex = 1),
+                    child: Text(
+                      'See all',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFBC7081),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CategoryButtonWidget(
+                  title: 'Popular',
+                  icon: const Icon(Icons.star, color: MokaColors.brown),
+                  isSelected: _selectedCategory == 'Popular',
+                  onTap: () => setState(() => _selectedCategory = 'Popular'),
+                ),
+                CategoryButtonWidget(
+                  title: 'Signature',
+                  icon: Image.asset(
+                    'assets/moka.png', // DIHAPUS WARNANYA
+                    width: 24,
+                    height: 24,
+                  ),
+                  isSelected: _selectedCategory == 'Signature',
+                  onTap: () => setState(() => _selectedCategory = 'Signature'),
+                ),
+                CategoryButtonWidget(
+                  title: 'Coffee',
+                  icon: const Icon(Icons.coffee, color: MokaColors.brown),
+                  isSelected: _selectedCategory == 'Coffee',
+                  onTap: () => setState(() => _selectedCategory = 'Coffee'),
+                ),
+                CategoryButtonWidget(
+                  title: 'Non-coffee',
+                  icon: const Icon(Icons.local_drink, color: MokaColors.brown),
+                  isSelected: _selectedCategory == 'Non-coffee',
+                  onTap: () => setState(() => _selectedCategory = 'Non-coffee'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _selectedCategory == 'Popular'
+                      ? 'Paling Laris'
+                      : 'Menu $_selectedCategory',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${filteredProducts.length} minuman',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    color: MokaColors.brownSoft,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            filteredProducts.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40),
+                      child: Text(
+                        'Belum ada menu di kategori ini.',
+                        style: TextStyle(color: MokaColors.brownSoft),
+                      ),
+                    ),
+                  )
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      int crossAxisCount = 2;
+                      double aspectRatio = 0.75;
+                      if (constraints.maxWidth > 700) {
+                        crossAxisCount = 4;
+                        aspectRatio = 0.72;
+                      } else if (constraints.maxWidth > 480) {
+                        crossAxisCount = 3;
+                        aspectRatio = 0.75;
+                      }
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          childAspectRatio: aspectRatio,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          return ProductCardItem(
+                            product: filteredProducts[index],
+                            onImageOrTitleTap: () =>
+                                _showDescription(filteredProducts[index]),
+                            onAddTap: () => _addToCart(filteredProducts[index]),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ],
+        ),
       ),
     );
   }
@@ -1214,7 +1257,6 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       backgroundColor: MokaColors.white,
       body: SafeArea(
-        // PENAMBAHAN CENTER & CONSTRAINEDBOX AGAR POSITIONED(RIGHT: 20) RESPONSIF
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 900),
@@ -1231,11 +1273,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   ],
                 ),
 
-                // TOMBOL SCROLL TO TOP (Akan tertahan di batas maksimal 900px)
                 if (_showScrollToTop && _currentIndex == 0)
                   Positioned(
                     right: 20,
-                    bottom: cart.isNotEmpty ? 220 : 120,
+                    bottom: cart.isNotEmpty
+                        ? 200
+                        : 110, // DISESUAIKAN AGAR TIDAK NABRAK
                     child: FloatingActionButton.small(
                       onPressed: _scrollToTop,
                       backgroundColor: MokaColors.brown,
@@ -1249,120 +1292,111 @@ class _DashboardPageState extends State<DashboardPage> {
 
                 if (cart.isNotEmpty &&
                     (_currentIndex == 0 || _currentIndex == 1))
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      margin: const EdgeInsets.only(
-                        bottom: 120,
-                        left: 20,
-                        right: 20,
-                      ),
-                      child: HoverableCart(
-                        itemCount: cart.length,
-                        totalPrice: totalPrice,
-                        onTap: _navigateToCheckout,
+                  Positioned(
+                    bottom: 115, // DITAIKKAN AGAR TIDAK NABRAK NAVBAR BAWAH
+                    left: 20,
+                    right: 20,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        child: HoverableCart(
+                          itemCount: cart.length,
+                          totalPrice: totalPrice,
+                          onTap: _navigateToCheckout,
+                        ),
                       ),
                     ),
                   ),
 
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    margin: const EdgeInsets.only(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: MokaColors.white,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 15,
-                          offset: Offset(0, 5),
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  child: Center(
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: MokaColors.white,
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 15,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: MokaColors.pinkSoft,
+                          width: 1.5,
                         ),
-                      ],
-                      border: Border.all(
-                        color: MokaColors.pinkSoft,
-                        width: 1.5,
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        HoverableNavItem(
-                          icon: Icons.home_filled,
-                          label: 'Home',
-                          isActive: _currentIndex == 0,
-                          onTap: () => setState(() => _currentIndex = 0),
-                        ),
-                        HoverableNavItem(
-                          icon: Icons.menu_book_outlined,
-                          label: 'Menu',
-                          isActive: _currentIndex == 1,
-                          onTap: () => setState(() => _currentIndex = 1),
-                        ),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: () => ScaffoldMessenger.of(context)
-                                .showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Promo Spesial MOKA segera hadir!',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          HoverableNavItem(
+                            icon: Icons.home_filled,
+                            label: 'Home',
+                            isActive: _currentIndex == 0,
+                            onTap: () => setState(() => _currentIndex = 0),
+                          ),
+                          HoverableNavItem(
+                            icon: Icons.menu_book_outlined,
+                            label: 'Menu',
+                            isActive: _currentIndex == 1,
+                            onTap: () => setState(() => _currentIndex = 1),
+                          ),
+                          MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () => ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Menu Kasir Pintar MOKA!'),
                                     ),
                                   ),
-                                ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: const BoxDecoration(
-                                    color: MokaColors.brown,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      'M',
-                                      style: TextStyle(
-                                        color: MokaColors.pink,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: const BoxDecoration(
+                                      color: MokaColors.brown,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/moka.png', // DIHAPUS WARNANYA
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'MOKA',
-                                  style: GoogleFonts.vt323(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: MokaColors.brown,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'MOKA',
+                                    style: GoogleFonts.vt323(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: MokaColors.brown,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        HoverableNavItem(
-                          icon: Icons.receipt_long_outlined,
-                          label: 'Pesanan',
-                          isActive: _currentIndex == 3,
-                          onTap: () => setState(() => _currentIndex = 3),
-                        ),
-                        HoverableNavItem(
-                          icon: Icons.person_outline,
-                          label: 'Akun',
-                          isActive: _currentIndex == 4,
-                          onTap: () => setState(() => _currentIndex = 4),
-                        ),
-                      ],
+                          HoverableNavItem(
+                            icon: Icons.receipt_long_outlined,
+                            label: 'Pesanan',
+                            isActive: _currentIndex == 3,
+                            onTap: () => setState(() => _currentIndex = 3),
+                          ),
+                          HoverableNavItem(
+                            icon: Icons.person_outline,
+                            label: 'Akun',
+                            isActive: _currentIndex == 4,
+                            onTap: () => setState(() => _currentIndex = 4),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

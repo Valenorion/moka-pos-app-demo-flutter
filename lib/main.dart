@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'moka_theme.dart';
-import 'splash_screen.dart'; // <--- Impor file splash screen baru Anda di sini
+import 'splash_screen.dart'; 
 
 void main() => runApp(const MokaApp());
 

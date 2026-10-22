@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'moka_theme.dart';
-import 'dashboard_page.dart'; // Mengambil fungsi formatRupiah & ProductCardItem
-import 'menu_data.dart'; // Mengambil definisi Product & list products
+import 'dashboard_page.dart';
+import 'menu_data.dart';
 
 class MenuPage extends StatefulWidget {
   final List<Product> products;
@@ -22,12 +22,11 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
-  String _selectedCategory = 'All'; // Filter default
+  String _selectedCategory = 'All';
 
   @override
   void initState() {
     super.initState();
-    // Mendeteksi jarak gulir (scroll) untuk menampilkan tombol panah ke atas
     _scrollController.addListener(() {
       if (_scrollController.offset > 250 && !_showScrollToTop) {
         setState(() => _showScrollToTop = true);
@@ -51,7 +50,31 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
-  // Menambahkan fitur Dialog Pop-Up seperti di dashboard
+  // FUNGSI REFRESH KATA KUNCI UTAMA
+  Future<void> _handleRefresh() async {
+    // Simulasi jeda jaringan/sinkronisasi katalog POS (misal: 1 detik)
+    await Future.delayed(const Duration(milliseconds: 1000));
+    if (mounted) {
+      setState(() {
+        // Reset kategori ke 'All' atau perbarui status state jika diperlukan
+        _selectedCategory = 'All';
+      });
+
+      // Tampilkan SnackBar kecil tanda refresh berhasil
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Katalog POS berhasil diperbarui!',
+            style: GoogleFonts.dmSans(color: MokaColors.white),
+          ),
+          backgroundColor: MokaColors.brown,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   void _showDescription(Product p) {
     showDialog(
       context: context,
@@ -137,7 +160,6 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Logika filtrasi menu
     List<Product> displayedProducts = _selectedCategory == 'All'
         ? widget.products
         : widget.products
@@ -146,189 +168,197 @@ class _MenuPageState extends State<MenuPage> {
 
     return Stack(
       children: [
-        SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.fromLTRB(20, 40, 20, 250),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Header Banner Interaktif & Estetis
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: MokaColors.pinkSoft,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: MokaColors.pink, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      offset: Offset(0, 4),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+        // MEMBUNGKUS DENGAN REFRESH INDICATOR UNTUK FITUR TARIK KE BAWAH (PULL-TO-REFRESH)
+        RefreshIndicator(
+          color: MokaColors.white,
+          backgroundColor: MokaColors.brown,
+          onRefresh: _handleRefresh,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(), // Wajib agar bisa ditarik meskipun konten belum penuh
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 250),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Header Banner Interaktif (KASIR POV)
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: MokaColors.pinkSoft,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: MokaColors.pink, width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(0, 4),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              color: MokaColors.white,
+                              child: Text(
+                                'KATALOG POS',
+                                style: GoogleFonts.vt323(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: MokaColors.brown,
+                                ),
+                              ),
                             ),
-                            color: MokaColors.white,
-                            child: Text(
-                              'OUR CRAFT',
+                            const SizedBox(height: 8),
+                            Text(
+                              'Terminal\nMenu Utama',
                               style: GoogleFonts.vt323(
-                                fontSize: 12,
+                                fontSize: 36,
+                                height: 1.0,
                                 fontWeight: FontWeight.bold,
                                 color: MokaColors.brown,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Full Menu',
-                            style: GoogleFonts.vt323(
-                              fontSize: 36,
-                              height: 1.0,
-                              fontWeight: FontWeight.bold,
-                              color: MokaColors.brown,
+                            const SizedBox(height: 8),
+                            Text(
+                              'Pilih pesanan pelanggan dengan cepat, akurat, dan langsung terekap.',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: MokaColors.brownSoft,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Temukan minuman favoritmu dari racikan terbaik kami.',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 13,
-                              color: MokaColors.brownSoft,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(
-                      Icons.coffee_maker,
-                      size: 54,
-                      color: MokaColors.brown,
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      const Icon(
+                        Icons.point_of_sale_sharp,
+                        size: 54,
+                        color: MokaColors.brown,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // 2. Baris Filter Kategori Menu (Pill Buttons)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: ['All', 'Signature', 'Coffee', 'Non-coffee'].map((
-                    cat,
-                  ) {
-                    bool isSelected = _selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: InkWell(
-                        onTap: () => setState(() => _selectedCategory = cat),
-                        borderRadius: BorderRadius.circular(20),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? MokaColors.brown
-                                : MokaColors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
+                // 2. Baris Filter Kategori Menu
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: ['All', 'Signature', 'Coffee', 'Non-coffee'].map((
+                      cat,
+                    ) {
+                      bool isSelected = _selectedCategory == cat;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          borderRadius: BorderRadius.circular(20),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
                               color: isSelected
                                   ? MokaColors.brown
-                                  : MokaColors.pinkSoft,
-                              width: 1.5,
-                            ),
-                            boxShadow: isSelected
-                                ? const [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      offset: Offset(0, 3),
-                                      blurRadius: 4,
-                                    ),
-                                  ]
-                                : [],
-                          ),
-                          child: Text(
-                            cat,
-                            style: GoogleFonts.dmSans(
-                              fontWeight: FontWeight.bold,
-                              color: isSelected
-                                  ? MokaColors.pinkSoft
-                                  : MokaColors.brown,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // 3. Grid Daftar Produk
-              displayedProducts.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(40),
-                        child: Text(
-                          'Belum ada menu di kategori ini.',
-                          style: GoogleFonts.dmSans(
-                            color: MokaColors.brownSoft,
-                          ),
-                        ),
-                      ),
-                    )
-                  : LayoutBuilder(
-                      builder: (context, constraints) {
-                        int crossAxisCount = 2;
-                        double aspectRatio = 0.75;
-                        if (constraints.maxWidth > 700) {
-                          crossAxisCount = 4;
-                          aspectRatio = 0.72;
-                        } else if (constraints.maxWidth > 480) {
-                          crossAxisCount = 3;
-                          aspectRatio = 0.75;
-                        }
-
-                        return GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                childAspectRatio: aspectRatio,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
+                                  : MokaColors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? MokaColors.brown
+                                    : MokaColors.pinkSoft,
+                                width: 1.5,
                               ),
-                          itemCount: displayedProducts.length,
-                          itemBuilder: (context, index) {
-                            return ProductCardItem(
-                              product: displayedProducts[index],
-                              onImageOrTitleTap: () =>
-                                  _showDescription(displayedProducts[index]),
-                              onAddTap: () =>
-                                  widget.onAddToCart(displayedProducts[index]),
-                            );
-                          },
-                        );
-                      },
-                    ),
-            ],
+                              boxShadow: isSelected
+                                  ? const [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        offset: Offset(0, 3),
+                                        blurRadius: 4,
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Text(
+                              cat,
+                              style: GoogleFonts.dmSans(
+                                fontWeight: FontWeight.bold,
+                                color: isSelected
+                                    ? MokaColors.pinkSoft
+                                    : MokaColors.brown,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // 3. Grid Daftar Produk
+                displayedProducts.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(40),
+                          child: Text(
+                            'Belum ada menu di kategori ini.',
+                            style: GoogleFonts.dmSans(
+                              color: MokaColors.brownSoft,
+                            ),
+                          ),
+                        ),
+                      )
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          int crossAxisCount = 2;
+                          double aspectRatio = 0.75;
+                          if (constraints.maxWidth > 700) {
+                            crossAxisCount = 4;
+                            aspectRatio = 0.72;
+                          } else if (constraints.maxWidth > 480) {
+                            crossAxisCount = 3;
+                            aspectRatio = 0.75;
+                          }
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  childAspectRatio: aspectRatio,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                ),
+                            itemCount: displayedProducts.length,
+                            itemBuilder: (context, index) {
+                              return ProductCardItem(
+                                product: displayedProducts[index],
+                                onImageOrTitleTap: () =>
+                                    _showDescription(displayedProducts[index]),
+                                onAddTap: () => widget.onAddToCart(
+                                  displayedProducts[index],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+              ],
+            ),
           ),
         ),
 
@@ -336,9 +366,9 @@ class _MenuPageState extends State<MenuPage> {
         if (_showScrollToTop)
           Positioned(
             right: 20,
-            bottom: 140, // Ditinggikan agar tidak bertabrakan dengan keranjang atau navbar bawah
+            bottom: 140,
             child: FloatingActionButton.small(
-              heroTag: 'menu_fab', // Mencegah bentrok dengan tombol di halaman dashboard
+              heroTag: 'menu_fab',
               onPressed: _scrollToTop,
               backgroundColor: MokaColors.brown,
               elevation: 4,
