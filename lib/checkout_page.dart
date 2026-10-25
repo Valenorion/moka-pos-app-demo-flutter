@@ -996,7 +996,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 color: CheckoutColors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -1144,7 +1144,7 @@ class _HoverablePaymentCardState extends State<HoverablePaymentCard> {
               boxShadow: _isHovered
                   ? [
                       BoxShadow(
-                        color: CheckoutColors.pinkLight.withOpacity(0.5),
+                        color: CheckoutColors.pinkLight.withValues(alpha: 0.5),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),

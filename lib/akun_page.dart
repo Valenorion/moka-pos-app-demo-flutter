@@ -69,7 +69,9 @@ class AkunPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: MokaColors.white, width: 2),
                   ),
-                  child: Center(child: Image.asset('moka.png', width: 40)),
+                  child: Center(
+                    child: Image.asset('assets/moka.png', width: 40),
+                  ),
                 ),
                 const SizedBox(width: 20),
                 Expanded(

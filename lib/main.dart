@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'moka_theme.dart';
-import 'splash_screen.dart'; 
+import 'splash_screen.dart';
 
-void main() => runApp(const MokaApp());
+void main() async {
+  // Wajib ditambahkan agar aplikasi tidak crash di versi Release (.apk)
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(const MokaApp());
+}
 
 class MokaApp extends StatelessWidget {
   const MokaApp({super.key});
@@ -15,10 +20,10 @@ class MokaApp extends StatelessWidget {
       title: 'MOKA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: MokaColors.white, // Background putih bersih
+        scaffoldBackgroundColor: MokaColors.white,
         textTheme: GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme),
       ),
-      home: const SplashScreen(), // Memanggil SplashScreen dari file terpisah
+      home: const SplashScreen(),
     );
   }
 }

@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
             child: Container(
               width: 12,
               height: 12,
-              color: MokaColors.brownSoft.withOpacity(0.3),
+              color: MokaColors.brownSoft.withValues(alpha: 0.3),
             ),
           ),
           Positioned(

@@ -216,7 +216,7 @@ class _PromoBannerSliderState extends State<PromoBannerSlider> {
                   decoration: BoxDecoration(
                     color: _currentPage == index
                         ? MokaColors.pink
-                        : MokaColors.brownSoft.withOpacity(0.3),
+                        : MokaColors.brownSoft.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 );
@@ -636,7 +636,9 @@ class _DashboardPageState extends State<DashboardPage> {
       try {
         final p = products.firstWhere((prod) => prod.id == id);
         loadedCart.add(p);
-      } catch (e) {}
+      } catch (e) {
+        debugPrint(e.toString());
+      }
     }
     setState(() => cart = loadedCart);
   }
@@ -829,7 +831,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final userCtrl = TextEditingController(text: currentUser);
     final passCtrl = TextEditingController();
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     showDialog(
       context: context,

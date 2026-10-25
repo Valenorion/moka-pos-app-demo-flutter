@@ -27,6 +27,7 @@ class _MenuPageState extends State<MenuPage> {
   @override
   void initState() {
     super.initState();
+    // PERBAIKAN: Menambahkan logika listener agar tombol scroll muncul saat digulir > 250 piksel
     _scrollController.addListener(() {
       if (_scrollController.offset > 250 && !_showScrollToTop) {
         setState(() => _showScrollToTop = true);
@@ -362,7 +363,7 @@ class _MenuPageState extends State<MenuPage> {
           ),
         ),
 
-        // 4. Tombol Scroll ke Atas
+        // 4. Tombol Scroll ke Atas (Akan muncul otomatis saat discroll ke bawah)
         if (_showScrollToTop)
           Positioned(
             right: 20,

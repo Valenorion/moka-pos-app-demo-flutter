@@ -207,7 +207,7 @@ class _AuthPageState extends State<AuthPage> {
 
   void _handleSubmit() async {
     final prefs = await SharedPreferences.getInstance();
-
+    if (!mounted) return;
     if (isLoginMode) {
       final savedUser = prefs.getString('user') ?? 'Valen';
       final savedPass = prefs.getString('pass') ?? '123';
@@ -244,6 +244,8 @@ class _AuthPageState extends State<AuthPage> {
 
       await prefs.setString('user', _userCtrl.text);
       await prefs.setString('pass', _passCtrl.text);
+
+      if (!mounted) return;
 
       setState(() {
         isLoginMode = true;
